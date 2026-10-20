@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Reforma Borja 17</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+:root {
+  /* Claude palette */
+  --cream: #FAF9F5;
+  --cream-2: #F5F3EC;
+  --cream-3: #EFEDE4;
+  --ink: #1F1E1D;
+  --ink-2: #3D3C3A;
+  --ink-3: #6B6862;
+  --ink-4: #8F8B83;
+
+  /* Back-compat variable names (JS references them) */
+  --primary: #C96442;
+  --primary-dark: #A84E33;
+  --primary-light: #D97757;
+  --primary-lighter: #E6A288;
+  --success: #5F7F55;
+  --warning: #A67C1A;
+  --danger: #8F3A20;
+  --bg: #FAF9F5;
+  --card: #FFFFFF;
+  --text: #1F1E1D;
+  --text-secondary: #6B6862;
+  --border: #E8E4D9;
+  --shadow: 0 0 0 1px rgba(31,30,29,0.04);
+  --shadow-lg: 0 1px 2px rgba(31,30,29,0.04), 0 2px 8px rgba(31,30,29,0.05);
+  --radius: 10px;
+  --accent: #F1DBD2;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'ss02', 'cv11';
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+}
+
+.serif {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.015em;
+}
+
+/* NAV */
+.nav {
+  background: var(--cream);
+  color: var(--ink);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+}
+.nav-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px 10px;
+  gap: 12px;
+}
+.nav-title {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.nav-subtitle {
+  padding: 0 20px 10px;
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+.nav-tabs {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 12px;
+  gap: 2px;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.nav-tab:hover { color: var(--ink); }
+.nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.share-btn {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--cream);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.share-btn:hover { background: #2F2E2C; }
+.share-btn:active { transform: scale(0.98); }
+
+/* CONTENT */
+.content {
+  padding: 24px 20px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+}
+.stat-value {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* TABLES */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -20px;
+  padding: 0 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--ink-2);
+}
+tr:hover { background: var(--cream-2); }
+tr:last-child td { border-bottom: none; }
+
+/* BADGES */
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.badge-success { background: #E6EFE0; color: #3F5A34; }
+.badge-warning { background: #F4EAD0; color: #7A5A14; }
+.badge-danger  { background: #F1DBD2; color: #8F3A20; }
+.badge-info    { background: #E4E6ED; color: #3D4A6B; }
+
+/* SELECT DROPDOWNS */
+select.estado-select, select.pago-select {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  background: var(--cream);
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 110px;
+  transition: border-color 0.15s;
+}
+select.estado-select:focus, select.pago-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(201,100,66,0.12);
+}
+
+/* GANTT */
+.gantt-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gantt-table {
+  min-width: 900px;
+}
+.gantt-table th, .gantt-table td {
+  text-align: center;
+  padding: 6px 4px;
+  font-size: 11px;
+}
+.gantt-table td:first-child, .gantt-table td:nth-child(2) {
+  text-align: left;
+  white-space: nowrap;
+}
+.gantt-bar {
+  height: 20px;
+  border-radius: 4px;
+  min-width: 100%;
+}
+.gantt-cell {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.gantt-cell:hover {
+  background: rgba(201,100,66,0.08) !important;
+}
+.gantt-phase {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  background: var(--cream-2);
+  color: var(--ink);
+}
+/* Harmonised earth-tone palette */
+.color-elec   { background: #7B8FA3; }
+.color-font   { background: #7B8FA3; }
+.color-alb    { background: #B06046; }
+.color-bano   { background: #C99B51; }
+.color-suelo  { background: #7F9472; }
+.color-vent   { background: #C96442; }
+.color-pint   { background: #6D9193; }
+.color-carp   { background: #8F6F87; }
+.color-remate { background: #7C7A72; }
+.color-org    { background: #4F4D46; }
+.color-demo   { background: #8C6A5A; }
+.color-aire   { background: #7B8FA3; }
+
+.gantt-week-header { font-size: 10px; font-weight: 500; color: var(--ink-2); }
+.gantt-date-header { font-size: 9px; color: var(--ink-4); font-weight: 400; }
+.gantt-current-week { background: rgba(201,100,66,0.06); }
+
+/* CALENDAR */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+.month-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.month-title {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--ink);
+}
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 12px;
+}
+.day-header {
+  font-weight: 500;
+  color: var(--ink-4);
+  padding: 6px 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.day-cell {
+  padding: 6px 2px;
+  border-radius: 6px;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.day-payment {
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-weight: 600;
+  cursor: pointer;
+}
+.day-payment-done {
+  background: #E6EFE0;
+  color: #3F5A34;
+  font-weight: 600;
+}
+.day-payment-last {
+  background: #F4EAD0;
+  color: #7A5A14;
+  font-weight: 600;
+}
+.day-today { border: 1.5px solid var(--primary); color: var(--primary); font-weight: 600; }
+
+/* PAYMENT LIST */
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+.payment-item:hover { background: var(--cream-2); }
+.payment-item.paid { background: transparent; opacity: 0.65; }
+.payment-info { flex: 1; }
+.payment-num { font-weight: 500; font-size: 14px; color: var(--ink); letter-spacing: -0.01em; }
+.payment-date { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.payment-amount {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  margin-left: 12px;
+  color: var(--ink);
+}
+
+.check-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: var(--cream);
+}
+.check-circle:hover { border-color: var(--primary); }
+.check-circle.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.check-circle.checked::after {
+  content: '';
+  width: 7px;
+  height: 12px;
+  border: solid var(--cream);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+/* PROGRESS RING */
+.progress-ring-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.progress-ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+.progress-ring svg {
+  transform: rotate(-90deg);
+  width: 200px;
+  height: 200px;
+}
+.progress-ring-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.progress-ring-pct {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.progress-ring-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* PHASE PROGRESS */
+.phase-progress {
+  margin-top: 12px;
+}
+.phase-item {
+  margin-bottom: 12px;
+}
+.phase-name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-bottom: 5px;
+  letter-spacing: -0.005em;
+}
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--cream-3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+.progress-fill-green  { background: #6B8163; }
+.progress-fill-blue   { background: #7B8FA3; }
+.progress-fill-orange { background: #C99B51; }
+.progress-fill-red    { background: #C96442; }
+.progress-fill-purple { background: #8F6F87; }
+.progress-fill-cyan   { background: #6D9193; }
+
+/* BUTTONS */
+.btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}
+.btn-primary { background: var(--primary); color: var(--cream); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--success); color: var(--cream); }
+.btn-danger  { background: var(--danger); color: var(--cream); }
+.btn-outline { background: transparent; border-color: var(--border); color: var(--ink-2); }
+.btn-outline:hover { background: var(--cream-2); border-color: var(--ink-4); color: var(--ink); }
+.btn-sm { padding: 6px 11px; font-size: 11.5px; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 1000;
+  transition: transform 0.25s ease;
+  box-shadow: 0 10px 30px rgba(31,30,29,0.15);
+  max-width: 90%;
+  text-align: center;
+  letter-spacing: -0.005em;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(31,30,29,0.40);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(31,30,29,0.18);
+}
+.modal h3 {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  font-size: 20px;
+  color: var(--ink);
+}
+.modal-field { margin-bottom: 14px; }
+.modal-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.modal-field input, .modal-field select, .modal-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--cream);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(201,100,66,0.12);
+}
+.modal-field textarea { min-height: 60px; resize: vertical; }
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* CATEGORY COLORS */
+.cat-demolicion       { border-left: 3px solid #8C6A5A; }
+.cat-electricidad     { border-left: 3px solid #7B8FA3; }
+.cat-fontaneria       { border-left: 3px solid #7B8FA3; }
+.cat-albanileria      { border-left: 3px solid #B06046; }
+.cat-ventanas         { border-left: 3px solid #C96442; }
+.cat-pintura          { border-left: 3px solid #6D9193; }
+.cat-terraza          { border-left: 3px solid #7F9472; }
+.cat-cocina           { border-left: 3px solid #6D9193; }
+.cat-banos            { border-left: 3px solid #C99B51; }
+.cat-suelos           { border-left: 3px solid #7F9472; }
+.cat-carpinteria      { border-left: 3px solid #8F6F87; }
+.cat-calefaccion      { border-left: 3px solid #B06046; }
+.cat-aire             { border-left: 3px solid #7B8FA3; }
+.cat-mobiliario       { border-left: 3px solid #C96442; }
+.cat-electrodomesticos{ border-left: 3px solid #7C7A72; }
+.cat-varios           { border-left: 3px solid #7C7A72; }
+
+.editable {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.editable:hover { background: var(--accent); }
+
+.fase-header td {
+  font-family: ui-serif, 'Tiempos Headline', 'Tiempos', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+/* SHARE MODAL */
+.share-options {
+  display: grid;
+  gap: 10px;
+}
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--cream);
+}
+.share-option:hover { background: var(--cream-2); border-color: var(--ink-4); }
+.share-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.share-option-text { font-size: 13px; }
+.share-option-title { font-weight: 600; color: var(--ink); margin-bottom: 2px; letter-spacing: -0.005em; }
+.share-option-desc { color: var(--ink-3); font-size: 11.5px; }
+
+/* DELETE ROW BUTTON */
+.delete-row {
+  background: none;
+  border: none;
+  color: var(--ink-4);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: all 0.15s;
+}
+.delete-row:hover { opacity: 1; color: var(--danger); background: var(--accent); }
+
+.edit-row {
+  background: none;
+  border: none;
+  color: var(--ink-4);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  opacity: 0.7;
+  transition: all 0.15s;
+  margin-right: 6px;
+}
+.edit-row:hover { opacity: 1; color: var(--primary); background: var(--accent); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .content { padding: 8px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .stat-card { padding: 10px; }
+  .stat-value { font-size: 18px; }
+  .stat-label { font-size: 10px; }
+  .card { padding: 10px; margin-bottom: 10px; }
+  .card-title { font-size: 13px; margin-bottom: 8px; }
+  td, th { padding: 6px 5px; font-size: 11px; }
+  .nav-title { font-size: 13px; }
+  .nav-tab { padding: 8px 12px; font-size: 12px; }
+  .payment-amount { font-size: 14px; }
+  .payment-num { font-size: 13px; }
+  .payment-item { padding: 10px 8px; }
+  .check-circle { width: 24px; height: 24px; }
+  .dash-grid-2col { grid-template-columns: 1fr !important; }
+  .dash-grid-3col { grid-template-columns: 1fr !important; }
+  .hero-total { font-size: 20px !important; }
+  .hero-sub { font-size: 16px !important; }
+  .hero-bar { height: 40px !important; }
+  .hero-bar-text { font-size: 16px !important; }
+  .hero-pad { padding: 14px 16px !important; }
+}
+@media (max-width: 480px) {
+  .content { padding: 6px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+  .stat-value { font-size: 16px; }
+  .stat-label { font-size: 9px; }
+  .card { padding: 8px; margin-bottom: 8px; }
+  .card-title { font-size: 12px; }
+  .hero-total { font-size: 18px !important; }
+  .hero-sub { font-size: 14px !important; }
+  .hero-bar { height: 36px !important; }
+  .hero-bar-text { font-size: 14px !important; }
+  .hero-pad { padding: 12px 12px !important; }
+  .nav-tab { padding: 7px 10px; font-size: 11px; }
+}
+@media (min-width: 769px) {
+  .dash-grid-2col { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-top">
+    <div style="display:flex;align-items:center;gap:12px">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" style="flex-shrink:0">
+        <rect width="38" height="38" rx="9" fill="#F1DBD2"/>
+        <path d="M7 28V14l5-4h14l5 4v14H7z" fill="none" stroke="#C96442" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M7 14h24" stroke="#C96442" stroke-width="1.3"/>
+        <rect x="11" y="17" width="5" height="5" rx="0.5" fill="none" stroke="#A84E33" stroke-width="1.2"/>
+        <rect x="22" y="17" width="5" height="5" rx="0.5" fill="none" stroke="#A84E33" stroke-width="1.2"/>
+        <rect x="15" y="22" width="8" height="6" rx="0.5" fill="none" stroke="#C96442" stroke-width="1.2"/>
+        <line x1="19" y1="22" x2="19" y2="28" stroke="#C96442" stroke-width="1"/>
+        <path d="M12 14V10l7-3 7 3v4" fill="none" stroke="#A84E33" stroke-width="1.2" stroke-linejoin="round"/>
+        <circle cx="19" cy="9" r="1.2" fill="#A84E33"/>
+      </svg>
+      <div>
+        <div class="nav-title">Reforma Borja 17</div>
+        <div style="font-size:9px;letter-spacing:2.5px;color:var(--ink-4);text-transform:uppercase;margin-top:3px;font-weight:500">PREDI PROPERTIES</div>
+      </div>
+    </div>
+    <span id="syncStatus" style="font-size:11px;color:var(--ink-3);display:flex;align-items:center;margin-right:8px"></span>
+    <button class="share-btn" onclick="openShareModal()">Compartir</button>
+  </div>
+  <div class="nav-subtitle" id="navSubtitle"></div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="presupuesto">Presupuesto</div>
+    <div class="nav-tab" data-tab="gantt">Gantt</div>
+    <div class="nav-tab" data-tab="pagos">Pagos</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-grid" id="dashStats"></div>
+    <div class="dash-grid-2col" style="display:grid;gap:10px;margin-bottom:10px">
+      <div class="card" style="padding:10px">
+        <div class="card-title" style="font-size:13px;margin-bottom:6px">Progreso General</div>
+        <div class="progress-ring-container" id="dashRing"></div>
+      </div>
+      <div class="card" style="padding:10px">
+        <div class="card-title" style="font-size:13px;margin-bottom:6px">Fases del Gantt</div>
+        <div id="dashPhaseProgress"></div>
+      </div>
+    </div>
+    <div class="dash-grid-2col" style="display:grid;gap:10px;margin-bottom:10px">
+      <div class="card" style="padding:10px">
+        <div class="card-title" style="font-size:13px;margin-bottom:6px">Pagos por Categoría</div>
+        <div id="dashFinancial"></div>
+      </div>
+      <div class="card" style="padding:10px">
+        <div class="card-title" style="font-size:13px;margin-bottom:6px">Fechas Clave</div>
+        <div id="dashTimeline"></div>
+      </div>
+    </div>
+    <div class="card" style="padding:10px;margin-bottom:10px">
+      <div class="card-title" style="font-size:13px;margin-bottom:6px">Calendario</div>
+      <div id="dashAllPayments"></div>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="card-title" style="font-size:14px;margin-bottom:8px">Todas las Tareas</div>
+      <div id="dashActiveTasks"></div>
+    </div>
+  </div>
+
+  <!-- PRESUPUESTO -->
+  <div class="tab-content" id="tab-presupuesto">
+    <div class="stats-grid" id="presupStats"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Detalle del Presupuesto</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addPresupuesto()">+ Añadir partida</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="presupTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Categoría</th>
+              <th>Concepto</th>
+              <th>Coste</th>
+              <th>Mat/MO</th>
+              <th>A quién</th>
+              <th>Estado</th>
+              <th>Pagado</th>
+              <th>Comentario</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="presupBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GANTT -->
+  <div class="tab-content" id="tab-gantt">
+    <div class="card">
+      <div class="card-title" id="ganttTitle"></div>
+      <div class="gantt-container">
+        <table class="gantt-table" id="ganttTable"></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Leyenda</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;">
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-org"></span> Organización</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-demo"></span> Demolición</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-elec"></span> Electricidad/Aire acondicionado</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-alb"></span> Albañilería</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-bano"></span> Baños</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-suelo"></span> Suelos</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-pint"></span> Pintura/Cocina</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-carp"></span> Carpintería/Muebles</span>
+        <span><span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle" class="color-remate"></span> Remates</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;margin-top:8px">
+        <span>Barras rayadas = Terminado</span>
+        <span>Barras sólidas = En curso o Sin empezar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGOS -->
+  <div class="tab-content" id="tab-pagos">
+    <div class="stats-grid" id="pagosStats"></div>
+
+    <!-- Category 1: Efectivo a Jose Antonio -->
+    <div class="card">
+      <div class="card-title">Efectivo a Jose Antonio</div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Haz clic en el círculo para marcar un pago como realizado</p>
+      <div id="pagosList"></div>
+    </div>
+
+    <!-- Category 2: Materiales incluidos presupuesto J.A. -->
+    <div class="card">
+      <div class="card-title">Materiales incluidos presupuesto J.A.</div>
+      <div id="matJASection"></div>
+    </div>
+
+    <!-- Category 3: Mobiliario, Electrodomésticos y Mis Compras -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">Mobiliario, Electrodomésticos y Mis Compras</div>
+        <button class="btn btn-primary btn-sm" onclick="addMisCompra()">+ Añadir compra</button>
+      </div>
+      <div id="misComprasSection"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calendario de Pagos</div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STORAGE_KEY = 'reforma_borja17_v1';
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDh6ZAFCQjvEBWzbGli1GfadjnbDhIBscA",
+  authDomain: "reforma-pa28.firebaseapp.com",
+  databaseURL: "https://reforma-pa28-default-rtdb.firebaseio.com",
+  projectId: "reforma-pa28",
+  storageBucket: "reforma-pa28.firebasestorage.app",
+  messagingSenderId: "52201027207",
+  appId: "1:52201027207:web:0d064ac82edd184be9ea22"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const dataRef = db.ref('reforma_borja17');
+let firebaseConnected = false;
+let savingToFirebase = false;
+
+const DEFAULT_DATA = {
+  presupuesto: [
+    {id:1,cat:"Demolición",concepto:"Descombro y limpieza: picado de la chimenea de la entrada, picado de la puerta de entrada, picado y apertura de la puerta del apartamento, picado de pared y de muro en la planta de arriba, picado de suelo, limpieza de terraza y retirada de cristales en la habitación 5",coste:4200,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:""},
+    {id:2,cat:"Albañilería",concepto:"Realización de tabiquería tanto en planta inferior como en superior",coste:3700,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:""},
+    {id:3,cat:"Baños",concepto:"Baño del apartamento: plato de ducha, taza y casetón. Azulejos a 15 €/m²",coste:3800,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"No incluye grifería, lavabo, espejo ni mampara"},
+    {id:4,cat:"Baños",concepto:"Reforma del baño de la planta de arriba: plato, taza y azulejos a 15 €/m²",coste:3700,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"No incluye grifería, lavabo, espejo ni mampara"},
+    {id:5,cat:"Baños",concepto:"Arreglo del baño de la planta de abajo",coste:350,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:""},
+    {id:6,cat:"Baños",concepto:"Aseo nuevo en la planta de arriba: taza y plato, azulejos a 15 €/m²",coste:3500,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"No incluye grifería, lavabo, espejo ni mampara"},
+    {id:7,cat:"Carpintería",concepto:"Retirada de 2 puertas de la planta superior para colocarlas en la planta inferior y colocación de 5 puertas en la planta superior. Solo mano de obra",coste:750,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Las 5 puertas nuevas las compro yo (partida 16)"},
+    {id:8,cat:"Electricidad",concepto:"Amoldar y reconexionar la instalación eléctrica para 8 habitaciones y cocina",coste:2100,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:""},
+    {id:9,cat:"Suelos",concepto:"Colocación de suelo cerámico a 15 €/m² en todo el piso",coste:4800,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Opción elegida. La alternativa SPC está en la partida 14"},
+    {id:10,cat:"Pintura",concepto:"Alisado y pintado",coste:2500,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:""},
+    {id:11,cat:"Aire Acondicionado",concepto:"Instalación de aire acondicionado en 8 habitaciones. Solo mano de obra",coste:2500,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Los equipos los compro yo (partida 15)"},
+    {id:12,cat:"Cocina",concepto:"Montaje de cocina, instalación de desagüe y acometidas de agua. Solo mano de obra",coste:1200,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Muebles y electrodomésticos los compro yo (partidas 17 y 18)"},
+    {id:13,cat:"Mobiliario",concepto:"Montaje de muebles según los precios unitarios de las obras anteriores (Borja 9 / PAA)",coste:0,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de cuantificar: nº de armarios, camas, lámparas... x precio unitario"},
+    {id:14,cat:"Suelos",concepto:"ALTERNATIVA a la partida 9: suelo SPC a 15 €/m², solo la zona del piso excluyendo la terraza",coste:0,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"No activa. Si se elige SPC: 4.000 € aquí y 0 € en la partida 9"},
+    {id:15,cat:"Aire Acondicionado",concepto:"Equipos de aire acondicionado para 8 habitaciones (la partida 11 es solo mano de obra)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
+    {id:16,cat:"Carpintería",concepto:"5 puertas nuevas para la planta superior (la partida 7 es solo mano de obra)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
+    {id:17,cat:"Cocina muebles",concepto:"Mobiliario de cocina y encimera (la partida 12 es solo montaje)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
+    {id:18,cat:"Electrodomésticos",concepto:"Electrodomésticos de la cocina",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
+    {id:19,cat:"Baños",concepto:"Grifería, lavabos, espejos y mamparas de los 3 baños y el aseo (no incluidos en el presupuesto de J.A.)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
+    {id:20,cat:"Mobiliario",concepto:"Mobiliario de las 8 habitaciones",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"}
+  ],
+  materialesPresupuesto: 0,
+  jaMaterialesIncluidos: 0,
+  pagos: [
+    {id:1,fecha:"2026-10-26",importe:5000,pagado:false},
+    {id:2,fecha:"2026-11-09",importe:5000,pagado:false},
+    {id:3,fecha:"2026-11-23",importe:5000,pagado:false},
+    {id:4,fecha:"2026-12-07",importe:5000,pagado:false},
+    {id:5,fecha:"2026-12-21",importe:5000,pagado:false},
+    {id:6,fecha:"2027-01-04",importe:5000,pagado:false},
+    {id:7,fecha:"2027-01-29",importe:0,pagado:false,isLast:true}
+  ],
+  materiales: [],
+  materialesJA: [],
+  ganttTasks: [
+    {id:1,name:"Organización de la reforma y planos",presupId:null,weeks:[-1,0,1],color:"color-org",phase:0},
+    {id:2,name:"1-Descombro y limpieza (chimenea, puertas, muros, suelo, terraza)",presupId:1,weeks:[1,2,3],color:"color-demo",phase:1},
+    {id:3,name:"8-Electricidad (8 habitaciones + cocina)",presupId:8,weeks:[3,4,5],color:"color-elec",phase:1},
+    {id:4,name:"2-Tabiquería planta inferior y superior",presupId:2,weeks:[3,4,5],color:"color-alb",phase:2},
+    {id:5,name:"3-Baño apartamento (plato, taza, casetón, alicatado)",presupId:3,weeks:[5,6,7,8],color:"color-bano",phase:2},
+    {id:6,name:"4-Baño planta arriba (plato, taza, alicatado)",presupId:4,weeks:[6,7,8],color:"color-bano",phase:2},
+    {id:7,name:"6-Aseo planta arriba (taza, plato, alicatado)",presupId:6,weeks:[7,8,9],color:"color-bano",phase:2},
+    {id:8,name:"5-Arreglo baño planta abajo",presupId:5,weeks:[8,9],color:"color-bano",phase:2},
+    {id:9,name:"9-Suelo cerámico en todo el piso",presupId:9,weeks:[8,9,10],color:"color-suelo",phase:3},
+    {id:10,name:"7-Puertas (2 reubicadas abajo + 5 nuevas arriba)",presupId:7,weeks:[10,11],color:"color-carp",phase:3},
+    {id:11,name:"12-Montaje cocina + desagüe + acometidas",presupId:12,weeks:[12,13],color:"color-pint",phase:3},
+    {id:12,name:"11-Aire acondicionado 8 habitaciones",presupId:11,weeks:[12,13],color:"color-aire",phase:3},
+    {id:13,name:"10-Alisado y pintado",presupId:10,weeks:[11,12,13],color:"color-pint",phase:4},
+    {id:14,name:"13-Montaje de muebles",presupId:13,weeks:[13,14],color:"color-carp",phase:5},
+    {id:15,name:"Remates y limpieza final",presupId:null,weeks:[14],color:"color-remate",phase:5},
+    {id:16,name:"Entrega final + último pago",presupId:null,weeks:[14],color:"color-remate",phase:5}
+  ],
+  nextId: 21
+};
+
+let data;
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      data = migrateData(JSON.parse(saved));
+    } else {
+      data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+  } catch(e) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Sync to Firebase
+  savingToFirebase = true;
+  dataRef.set(data).then(() => {
+    savingToFirebase = false;
+    updateSyncStatus('synced');
+  }).catch(err => {
+    savingToFirebase = false;
+    updateSyncStatus('offline');
+  });
+  updateSyncStatus('syncing');
+}
+
+// Firebase converts arrays to objects {0:..., 1:...} — convert back
+function toArray(v) {
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === 'object' && !Array.isArray(v)) {
+    const keys = Object.keys(v);
+    if (keys.length === 0) return [];
+    // Check if keys are numeric
+    if (keys.every(k => !isNaN(k))) return Object.values(v);
+  }
+  return v || [];
+}
+
+function migrateData(d) {
+  // Fix Firebase object-to-array conversion
+  d.presupuesto = toArray(d.presupuesto);
+  d.pagos = toArray(d.pagos);
+  d.materiales = toArray(d.materiales);
+  d.ganttTasks = toArray(d.ganttTasks);
+  d.materialesJA = toArray(d.materialesJA);
+  // Fix nested arrays in ganttTasks (weeks). Firebase drops empty arrays,
+  // so a task with all weeks toggled off comes back without `weeks` at all.
+  d.ganttTasks.forEach(t => { if (t) t.weeks = toArray(t.weeks || []); });
+  // Defaults
+  if (!d.ganttTasks || d.ganttTasks.length === 0) d.ganttTasks = DEFAULT_DATA.ganttTasks;
+  if (!d.materialesPresupuesto) d.materialesPresupuesto = DEFAULT_DATA.materialesPresupuesto;
+  if (!d.jaMaterialesIncluidos) d.jaMaterialesIncluidos = DEFAULT_DATA.jaMaterialesIncluidos;
+  if (!d.materialesJA) d.materialesJA = [];
+  if (!d.nextId) d.nextId = DEFAULT_DATA.nextId;
+  return d;
+}
+
+function initFirebase() {
+  dataRef.on('value', (snapshot) => {
+    if (savingToFirebase) return; // Ignore echo from our own save
+    const fbData = snapshot.val();
+    if (fbData) {
+      data = migrateData(fbData);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      firebaseConnected = true;
+      updateSyncStatus('synced');
+      renderAll();
+    } else {
+      // DB is empty, seed it with current data
+      dataRef.set(data);
+    }
+  }, (err) => {
+    firebaseConnected = false;
+    updateSyncStatus('offline');
+  });
+
+  // Connection state
+  firebase.database().ref('.info/connected').on('value', (snap) => {
+    firebaseConnected = snap.val() === true;
+    updateSyncStatus(firebaseConnected ? 'synced' : 'offline');
+  });
+}
+
+function updateSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const colors = { synced: '#5F7F55', syncing: '#C99B51', offline: '#C96442' };
+  const labels = { synced: 'Sync', syncing: 'Sync...', offline: 'Offline' };
+  el.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+colors[status]+';margin-right:4px"></span>' + labels[status];
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// COMPUTED
+// ============================================================
+function getJATotal() { return data.presupuesto.filter(p => p.quien === "Jose Antonio (cash)").reduce((s,p) => s + p.coste, 0); }
+function getJAPagar() { return getJATotal() - data.jaMaterialesIncluidos; }
+function getMisCompras() { return data.presupuesto.filter(p => p.quien === "Comprar y pagar yo").reduce((s,p) => s + p.coste, 0); }
+function getTotalReforma() { return data.presupuesto.reduce((s,p) => s + p.coste, 0); }
+function getTerminadas() { return data.presupuesto.filter(p => p.estado === "Terminado").length; }
+function getEnCurso() { return data.presupuesto.filter(p => p.estado === "En curso").length; }
+function getSinEmpezar() { return data.presupuesto.filter(p => p.estado === "Sin empezar").length; }
+function getTotalPagado() { return data.pagos.filter(p => p.pagado).reduce((s,p) => s + p.importe, 0); }
+function getTotalPendiente() { return getJAPagar() - getTotalPagado(); }
+function getMatGastado() { return data.materiales.reduce((s,m) => s + (m.importe || 0), 0); }
+function getMatJAGastado() { return data.materialesJA.reduce((s,m) => s + (m.importe || 0), 0); }
+function getMisComprasGastado() { return getMatGastado(); }
+function getTotalPagadoAll() { return getTotalPagado() + getMatJAGastado() + getMisComprasGastado(); }
+
+// Current week number relative to the Gantt timeline (can be negative for pre-weeks)
+function getCurrentWeekNum() {
+  const inicio = getFechaInicio();
+  const baseDate = new Date(inicio);
+  const dow = baseDate.getDay();
+  const diff = dow === 0 ? -6 : 1 - dow;
+  baseDate.setDate(baseDate.getDate() + diff);
+  const now = new Date();
+  const msDiff = now - baseDate;
+  const weekNum = Math.floor(msDiff / (7 * 24 * 60 * 60 * 1000)) + 1;
+  return weekNum;
+}
+
+// Auto-calculate task status from Gantt weeks vs current week
+function getTaskEstado(ganttTask) {
+  const curWeek = getCurrentWeekNum();
+  const weeks = toArray(ganttTask.weeks);
+  if (!weeks || weeks.length === 0) return 'Sin empezar';
+  const minW = Math.min(...weeks);
+  const maxW = Math.max(...weeks);
+  if (curWeek > maxW) return 'Terminado';
+  if (curWeek >= minW && curWeek <= maxW) return 'En curso';
+  return 'Sin empezar';
+}
+
+// Sync gantt-derived status to linked presupuesto items (no saveData here to avoid Firebase loop)
+function syncGanttToPresupuesto() {
+  data.ganttTasks.forEach(t => {
+    if (t.presupId !== null) {
+      const pi = data.presupuesto.find(p => p.id === t.presupId);
+      if (pi) pi.estado = getTaskEstado(t);
+    }
+  });
+}
+
+function updateLastPayment() {
+  const last = data.pagos.find(p => p.isLast);
+  if (last) {
+    const otherTotal = data.pagos.filter(p => !p.isLast).reduce((s,p) => s + p.importe, 0);
+    last.importe = Math.max(0, getJAPagar() - otherTotal);
+  }
+}
+function getFechaInicio() {
+  const fechas = data.pagos.map(p => new Date(p.fecha)).sort((a,b) => a-b);
+  return fechas[0];
+}
+function getFechaFin() {
+  const fechas = data.pagos.map(p => new Date(p.fecha)).sort((a,b) => a-b);
+  return fechas[fechas.length - 1];
+}
+function mondayOf(d) {
+  const m = new Date(d);
+  const dow = m.getDay();
+  m.setDate(m.getDate() + (dow === 0 ? -6 : 1 - dow));
+  m.setHours(0, 0, 0, 0);
+  return m;
+}
+function getNumSemanas() {
+  // Semanas naturales (lunes a domingo) entre el primer y el último pago
+  return Math.round((mondayOf(getFechaFin()) - mondayOf(getFechaInicio())) / (7 * 24 * 60 * 60 * 1000)) + 1;
+}
+function fmtDateLong(d) {
+  return d.toLocaleDateString('es-ES', {day:'numeric', month:'long', year:'numeric'});
+}
+function fmtDateShort(d) {
+  return d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit'});
+}
+
+// ============================================================
+// FORMAT
+// ============================================================
+function fmt(n) { return new Intl.NumberFormat('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2}).format(n) + ' \u20AC'; }
+function fmtDate(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+}
+function catClass(cat) {
+  const map = {'Demolición':'demolicion','Electricidad':'electricidad','Fontanería':'fontaneria','Albañilería':'albanileria','Ventanas':'ventanas','Pintura':'pintura','Terraza':'terraza','Cocina':'cocina','Cocina muebles':'cocina','Baños':'banos','Baño':'banos','Suelos':'suelos','Carpintería':'carpinteria','Calefacción':'calefaccion','Aire Acondicionado':'aire','Mobiliario':'mobiliario','Electrodomésticos':'electrodomesticos','Varios':'varios'};
+  return 'cat-' + (map[cat] || 'varios');
+}
+function estadoBadge(e) {
+  if (e === 'Terminado') return '<span class="badge badge-success">Terminado</span>';
+  if (e === 'En curso') return '<span class="badge badge-warning">En curso</span>';
+  return '<span class="badge badge-danger">Sin empezar</span>';
+}
+function pagadoBadge(p) {
+  if (p === 'Pagado') return '<span class="badge badge-success">Pagado</span>';
+  if (p === 'Parcial') return '<span class="badge badge-warning">Parcial</span>';
+  return '<span class="badge badge-info">Sin pagar</span>';
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  updateLastPayment();
+  const total = data.presupuesto.length;
+  const terminadas = getTerminadas();
+  const enCurso = getEnCurso();
+  const sinEmp = getSinEmpezar();
+
+  // Weighted progress including gantt-only tasks (Fase 0, etc.)
+  const costeTotal = data.presupuesto.reduce((s,p) => s + p.coste, 0);
+  const costeTerminado = data.presupuesto.filter(p=>p.estado==='Terminado').reduce((s,p) => s + p.coste, 0);
+  const costeCurso = data.presupuesto.filter(p=>p.estado==='En curso').reduce((s,p) => s + p.coste, 0);
+  // Count gantt-only tasks (presupId===null) - auto-calculate status from timeline
+  const ganttOnly = data.ganttTasks.filter(t => t.presupId === null);
+  const totalTasks = total + ganttOnly.length;
+  const ganttOnlyTerminado = ganttOnly.filter(t => getTaskEstado(t) === 'Terminado').length;
+  const ganttOnlyCurso = ganttOnly.filter(t => getTaskEstado(t) === 'En curso').length;
+  // Blended progress: weight presupuesto by cost, gantt-only tasks each count as avg cost
+  const avgCost = costeTotal > 0 ? costeTotal / total : 1;
+  const virtualTotal = costeTotal + ganttOnly.length * avgCost;
+  const virtualTerminado = costeTerminado + ganttOnlyTerminado * avgCost;
+  const virtualCurso = costeCurso + ganttOnlyCurso * avgCost;
+  const pctWeighted = virtualTotal > 0 ? Math.round(((virtualTerminado + virtualCurso * 0.5) / virtualTotal) * 100) : 0;
+
+  const totalEnCursoAll = enCurso + ganttOnlyCurso;
+  const totalTerminadasAll = terminadas;
+  const totalSinEmpAll = sinEmp;
+
+  const dashTotalPagadoAll = getTotalPagadoAll();
+  const dashTotalPendienteAll = getTotalReforma() - dashTotalPagadoAll;
+  const dashPctPagado = getTotalReforma() > 0 ? Math.min(100, Math.round(dashTotalPagadoAll / getTotalReforma() * 100)) : 0;
+  document.getElementById('dashStats').innerHTML = `
+    <div class="hero-pad" style="background:#1F1E1D;border:1px solid #1F1E1D;border-radius:14px;padding:22px 24px;color:#FAF9F5">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+        <div style="flex:1;min-width:120px">
+          <div style="font-size:10.5px;color:rgba(250,249,245,0.55);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">Total Reforma</div>
+          <div class="hero-total" style="font-family:ui-serif,'Tiempos Headline',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-0.02em;margin-top:4px">${fmt(getTotalReforma())}</div>
+        </div>
+        <div style="flex:1;min-width:90px">
+          <div style="font-size:10.5px;color:rgba(250,249,245,0.55);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">Pagado</div>
+          <div class="hero-sub" style="font-family:ui-serif,'Tiempos Headline',Georgia,serif;font-size:22px;font-weight:500;margin-top:4px;color:#E6A288">${fmt(dashTotalPagadoAll)}</div>
+        </div>
+        <div style="flex:1;min-width:90px">
+          <div style="font-size:10.5px;color:rgba(250,249,245,0.55);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">Pendiente</div>
+          <div class="hero-sub" style="font-family:ui-serif,'Tiempos Headline',Georgia,serif;font-size:22px;font-weight:500;margin-top:4px;color:rgba(250,249,245,0.85)">${fmt(dashTotalPendienteAll)}</div>
+        </div>
+      </div>
+      <div class="hero-bar" style="position:relative;height:40px;background:rgba(250,249,245,0.08);border-radius:999px;overflow:hidden">
+        <div style="height:100%;width:${dashPctPagado}%;background:linear-gradient(90deg,#C96442,#E6A288);border-radius:999px;transition:width 0.8s ease"></div>
+        <div class="hero-bar-text" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:#FAF9F5;letter-spacing:-0.005em">
+          ${dashPctPagado}% pagado
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Progress ring (smaller)
+  const r = 60;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pctWeighted / 100) * circ;
+  const color = pctWeighted >= 75 ? '#5F7F55' : pctWeighted >= 40 ? '#C99B51' : '#C96442';
+
+  const ringSize = 120;
+  const svgR = 50;
+  const svgCirc = 2 * Math.PI * svgR;
+  const svgOffset = svgCirc - (pctWeighted / 100) * svgCirc;
+  document.getElementById('dashRing').innerHTML = `
+    <div style="position:relative;width:${ringSize}px;height:${ringSize}px;margin:0 auto">
+      <svg viewBox="0 0 120 120" style="width:${ringSize}px;height:${ringSize}px;transform:rotate(-90deg)">
+        <circle cx="60" cy="60" r="${svgR}" fill="none" stroke="#EFEDE4" stroke-width="8"/>
+        <circle cx="60" cy="60" r="${svgR}" fill="none" stroke="${color}" stroke-width="8"
+          stroke-dasharray="${svgCirc}" stroke-dashoffset="${svgOffset}" stroke-linecap="round"
+          style="transition: stroke-dashoffset 1s ease"/>
+      </svg>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+        <div style="font-family:ui-serif,'Tiempos Headline',Georgia,serif;font-size:26px;font-weight:500;letter-spacing:-0.02em;color:${color}">${pctWeighted}%</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;font-size:11px;justify-content:center;flex-wrap:wrap;margin-top:10px;color:var(--ink-3)">
+      <div style="text-align:center"><strong style="font-family:ui-serif,Georgia,serif;color:#5F7F55;font-size:18px;font-weight:500;display:block;letter-spacing:-0.01em">${totalTerminadasAll}</strong>Listas</div>
+      <div style="text-align:center"><strong style="font-family:ui-serif,Georgia,serif;color:#C99B51;font-size:18px;font-weight:500;display:block;letter-spacing:-0.01em">${totalEnCursoAll}</strong>En curso</div>
+      <div style="text-align:center"><strong style="font-family:ui-serif,Georgia,serif;color:#C96442;font-size:18px;font-weight:500;display:block;letter-spacing:-0.01em">${totalSinEmpAll}</strong>Pendientes</div>
+    </div>
+  `;
+
+  // Phase progress (by Gantt phases)
+  const phases = [
+    {name:"Fase 0: Organización", phase:0},
+    {name:"Fase 1: Demolición e instalaciones", phase:1},
+    {name:"Fase 2: Tabiquería y baños", phase:2},
+    {name:"Fase 3: Suelos, carpintería y cocina", phase:3},
+    {name:"Fase 4: Acabados", phase:4},
+    {name:"Fase 5: Remates", phase:5}
+  ];
+  const phaseColors = ['#7F9472','#4F4D46','#7B8FA3','#6D9193','#C99B51','#C96442'];
+  document.getElementById('dashPhaseProgress').innerHTML = phases.map((ph, idx) => {
+    const tasks = data.ganttTasks.filter(t => t.phase === ph.phase);
+    if (tasks.length === 0) return '';
+    let done = 0, curso = 0;
+    tasks.forEach(t => {
+      const st = getTaskEstado(t);
+      if (st === 'Terminado') done++;
+      if (st === 'En curso') curso++;
+    });
+    const pct = Math.round(((done + curso * 0.5) / tasks.length) * 100);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--ink-2)"><span>${ph.name}</span><span style="color:var(--ink-3);font-weight:500;font-variant-numeric:tabular-nums">${pct}%</span></div>
+      <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${phaseColors[idx]};border-radius:999px;transition:width 0.6s ease"></div></div>
+    </div>`;
+  }).join('');
+
+  // Financial (3 progress bars)
+  const dashJAPagar = getJAPagar();
+  const dashJAPagado = getTotalPagado();
+  const dashJAPct = dashJAPagar > 0 ? Math.min(100, Math.round(dashJAPagado / dashJAPagar * 100)) : 0;
+  const dashMatJA = data.jaMaterialesIncluidos;
+  const dashMatJAGastado = getMatJAGastado();
+  const dashMatJAPct = dashMatJA > 0 ? Math.min(100, Math.round(dashMatJAGastado / dashMatJA * 100)) : 0;
+  const dashMisCompras = getMisCompras();
+  const dashMisGastado = getMisComprasGastado();
+  const dashMisPct = dashMisCompras > 0 ? Math.min(100, Math.round(dashMisGastado / dashMisCompras * 100)) : 0;
+  document.getElementById('dashFinancial').innerHTML = `
+    <div style="font-size:12px;color:var(--ink-2)">
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span>Efectivo J.A.</span><span style="color:var(--ink-3);font-variant-numeric:tabular-nums">${fmt(dashJAPagado)} / ${fmt(dashJAPagar)}</span></div>
+        <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${dashJAPct}%;background:var(--primary);border-radius:999px;transition:width 0.6s ease"></div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span>Mat. J.A.</span><span style="color:var(--ink-3);font-variant-numeric:tabular-nums">${fmt(dashMatJAGastado)} / ${fmt(dashMatJA)}</span></div>
+        <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${dashMatJAPct}%;background:var(--primary);border-radius:999px;transition:width 0.6s ease"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span>Mis compras</span><span style="color:var(--ink-3);font-variant-numeric:tabular-nums">${fmt(dashMisGastado)} / ${fmt(dashMisCompras)}</span></div>
+        <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${dashMisPct}%;background:var(--primary);border-radius:999px;transition:width 0.6s ease"></div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;font-size:11.5px">
+        <div style="display:flex;justify-content:space-between;padding:3px 0;color:var(--ink-3)"><span>Pendiente Efectivo</span><strong style="color:var(--ink);font-variant-numeric:tabular-nums;font-weight:500">${fmt(dashJAPagar - dashJAPagado)}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;color:var(--ink-3)"><span>Pendiente Mat. J.A.</span><strong style="color:var(--ink);font-variant-numeric:tabular-nums;font-weight:500">${fmt(dashMatJA - dashMatJAGastado)}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;color:var(--ink-3)"><span>Pendiente Mis compras</span><strong style="color:var(--ink);font-variant-numeric:tabular-nums;font-weight:500">${fmt(dashMisCompras - dashMisGastado)}</strong></div>
+      </div>
+    </div>
+  `;
+
+  // Mini calendar (current month + next month)
+  const today = new Date();
+  const payDates = data.pagos.map(p => p.fecha); // "YYYY-MM-DD" strings
+  function buildMiniCal(year, month) {
+    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const dayNames = ['L','M','X','J','V','S','D'];
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    let startDow = firstDay.getDay(); // 0=Sun
+    startDow = startDow === 0 ? 6 : startDow - 1; // Convert to Mon=0
+    let html = `<div style="margin-bottom:8px">
+      <div style="font-weight:700;font-size:12px;text-align:center;margin-bottom:3px;color:var(--primary)">${monthNames[month]} ${year}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center">`;
+    dayNames.forEach(d => { html += `<div style="font-size:9px;font-weight:600;color:var(--text-secondary);padding:1px 0">${d}</div>`; });
+    for (let i = 0; i < startDow; i++) html += '<div></div>';
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+      const isPay = payDates.includes(dateStr);
+      const isPaidPay = isPay && data.pagos.find(p => p.fecha === dateStr && p.pagado);
+      let bg = 'transparent', clr = 'var(--ink-2)', brd = 'none', fw = '400';
+      if (isToday && isPay) { bg = '#C96442'; clr = '#FAF9F5'; fw = '600'; brd = '1.5px solid #A84E33'; }
+      else if (isToday) { bg = '#1F1E1D'; clr = '#FAF9F5'; fw = '600'; }
+      else if (isPaidPay) { bg = '#E6EFE0'; clr = '#3F5A34'; fw = '600'; }
+      else if (isPay) { bg = '#F1DBD2'; clr = '#A84E33'; fw = '600'; }
+      html += `<div style="font-size:11px;padding:2px 0;border-radius:50%;background:${bg};color:${clr};font-weight:${fw};border:${brd};line-height:1.5;min-width:22px">${d}</div>`;
+    }
+    html += '</div></div>';
+    return html;
+  }
+  const m1 = today.getMonth();
+  const y1 = today.getFullYear();
+  const m2 = m1 === 11 ? 0 : m1 + 1;
+  const y2 = m1 === 11 ? y1 + 1 : y1;
+  document.getElementById('dashAllPayments').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>${buildMiniCal(y1, m1)}</div>
+      <div>${buildMiniCal(y2, m2)}</div>
+    </div>
+    <div style="display:flex;gap:14px;justify-content:center;font-size:11px;margin-top:10px;flex-wrap:wrap;color:var(--ink-3)">
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1F1E1D;vertical-align:middle;margin-right:3px"></span>Hoy</span>
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#F1DBD2;vertical-align:middle;margin-right:3px"></span>Pago</span>
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#E6EFE0;vertical-align:middle;margin-right:3px"></span>Pagado</span>
+    </div>`;
+
+  // Timeline / key dates with delay tracking
+  const inicio = getFechaInicio();
+  const fin = getFechaFin();
+  const now = new Date();
+  const diasTotal = Math.ceil((fin - inicio) / (1000*60*60*24));
+  const diasTranscurridos = Math.max(0, Math.ceil((now - inicio) / (1000*60*60*24)));
+  const diasRestantes = Math.max(0, Math.ceil((fin - now) / (1000*60*60*24)));
+  const pctTime = diasTotal > 0 ? Math.min(100, Math.round((diasTranscurridos / diasTotal) * 100)) : 0;
+  // Calculate expected progress vs actual to detect delay
+  const pctObra = pctWeighted; // actual work progress
+  const semanasRetraso = pctTime > 0 && pctObra < pctTime ? Math.round((pctTime - pctObra) * diasTotal / 700) : 0;
+  // Expected end date accounting for delay
+  const finEsperado = semanasRetraso > 0 ? new Date(fin.getTime() + semanasRetraso * 7 * 24*60*60*1000) : fin;
+
+  document.getElementById('dashTimeline').innerHTML = `
+    <div style="font-size:11.5px;color:var(--ink-2)">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--ink-3)">Inicio</span><strong style="font-weight:500;color:var(--ink)">${fmtDateLong(inicio)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--ink-3)">Fin planificado</span><strong style="font-weight:500;color:var(--ink)">${fmtDateLong(fin)}</strong>
+      </div>
+      ${semanasRetraso > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--ink-3)">Fin esperado</span><strong style="color:var(--danger);font-weight:500">${fmtDateLong(finEsperado)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--ink-3)">Retraso</span><strong style="color:var(--danger);font-weight:500">${semanasRetraso} sem.</strong>
+      </div>` : `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--ink-3)">Retraso</span><strong style="color:#5F7F55;font-weight:500">Sin retraso</strong>
+      </div>`}
+      <div style="margin-top:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px"><span style="color:var(--ink-3)">Tiempo</span><span style="color:var(--ink-3);font-variant-numeric:tabular-nums">${diasTranscurridos}d / ${diasTotal}d · ${pctTime}%</span></div>
+        <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pctTime}%;background:var(--ink-3);border-radius:999px"></div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px"><span style="color:var(--ink-3)">Obra</span><span style="color:var(--ink-3);font-variant-numeric:tabular-nums">${pctObra}%</span></div>
+        <div style="height:5px;background:var(--cream-3);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pctObra}%;background:var(--primary);border-radius:999px"></div></div>
+      </div>
+      <div style="text-align:center;padding:10px 0;font-family:ui-serif,Georgia,serif;font-weight:500;font-size:18px;letter-spacing:-0.01em;color:${diasRestantes<=14?'var(--danger)':'var(--ink)'}">Quedan ${diasRestantes} días</div>
+    </div>
+  `;
+
+  // All tasks (compact table)
+  const allTasks = data.presupuesto;
+  // Also add gantt-only tasks
+  const ganttOnlyTasks = data.ganttTasks.filter(t => t.presupId === null).map(t => ({
+    cat: 'Organización', concepto: t.name, coste: 0, estado: getTaskEstado(t), pagado: '-', isGanttOnly: true
+  }));
+  const combined = [...ganttOnlyTasks, ...allTasks];
+  document.getElementById('dashActiveTasks').innerHTML = `<div class="table-wrapper"><table style="font-size:11.5px"><thead><tr><th style="padding:6px 8px">#</th><th style="padding:6px 8px">Cat.</th><th style="padding:6px 8px">Concepto</th><th style="padding:6px 8px">Coste</th><th style="padding:6px 8px">Estado</th></tr></thead><tbody>
+    ${combined.map((t, i) => `<tr style="${t.estado==='En curso'?'background:#F4EAD0':t.estado==='Terminado'?'background:#E6EFE0':''}"><td style="padding:5px 8px;color:var(--ink-3)">${i+1}</td><td style="padding:5px 8px;font-size:10.5px;color:var(--ink-3)">${t.cat}</td><td style="padding:5px 8px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--ink-2)">${t.concepto}</td><td style="padding:5px 8px;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)">${t.coste>0?fmt(t.coste):'-'}</td><td style="padding:5px 8px">${estadoBadge(t.estado)}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+// ============================================================
+// PRESUPUESTO
+// ============================================================
+function renderPresupuesto() {
+  updateLastPayment();
+  document.getElementById('presupStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value" style="color:var(--primary)">${fmt(getJAPagar())}</div><div class="stat-label">A pagar J.A.</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--warning)">${fmt(getMisCompras())}</div><div class="stat-label">Mis compras</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--danger)">${fmt(getTotalReforma())}</div><div class="stat-label">Total reforma</div></div>
+    <div class="stat-card"><div class="stat-value">${getTerminadas()}/${data.presupuesto.length}</div><div class="stat-label">Terminadas</div></div>
+  `;
+
+  document.getElementById('presupBody').innerHTML = data.presupuesto.map((p, i) => `
+    <tr class="${catClass(p.cat)}">
+      <td>${p.id}</td>
+      <td><strong>${p.cat}</strong></td>
+      <td style="max-width:280px;font-size:12px" class="editable" onclick="editPresupField(${i},'concepto')">${p.concepto}</td>
+      <td style="white-space:nowrap" class="editable" onclick="editPresupField(${i},'coste')"><strong>${fmt(p.coste)}</strong></td>
+      <td>${p.tipo}</td>
+      <td style="font-size:11px">${p.quien}</td>
+      <td>${data.ganttTasks.some(g=>g.presupId===p.id)
+        ? '<span title="Controlado por Gantt">'+estadoBadge(p.estado)+'</span>'
+        : '<select class="estado-select" onchange="changeEstado('+i+', this.value)" style="background:'+(p.estado==='Terminado'?'#E6EFE0':p.estado==='En curso'?'#F4EAD0':'#F1DBD2')+'"><option '+(p.estado==='Sin empezar'?'selected':'')+'>Sin empezar</option><option '+(p.estado==='En curso'?'selected':'')+'>En curso</option><option '+(p.estado==='Terminado'?'selected':'')+'>Terminado</option></select>'
+      }</td>
+      <td>
+        <select class="pago-select" onchange="changePagado(${i}, this.value)" style="background:${p.pagado==='Pagado'?'#E6EFE0':p.pagado==='Parcial'?'#F4EAD0':'#E4E6ED'}">
+          <option ${p.pagado==='Sin pagar'?'selected':''}>Sin pagar</option>
+          <option ${p.pagado==='Parcial'?'selected':''}>Parcial</option>
+          <option ${p.pagado==='Pagado'?'selected':''}>Pagado</option>
+        </select>
+      </td>
+      <td style="font-size:11.5px;max-width:200px;color:var(--ink-3)" class="editable" onclick="editPresupField(${i},'comentario')">${p.comentario || '<span style="color:var(--ink-4);font-style:italic">+ comentario</span>'}</td>
+      <td><button class="delete-row" onclick="deletePresupuesto(${i})" title="Eliminar">&times;</button></td>
+    </tr>
+  `).join('');
+}
+
+function changeEstado(idx, val) {
+  data.presupuesto[idx].estado = val;
+  saveData(); renderAll();
+  showToast('Estado actualizado: ' + val);
+}
+function changePagado(idx, val) {
+  data.presupuesto[idx].pagado = val;
+  saveData(); renderAll();
+  showToast('Pago actualizado: ' + val);
+}
+
+function editPresupField(idx, field) {
+  const p = data.presupuesto[idx];
+  let newVal;
+  if (field === 'coste') {
+    newVal = prompt('Coste (EUR):', p.coste);
+    if (newVal !== null && newVal !== '') {
+      p.coste = parseFloat(newVal) || 0;
+      saveData(); renderAll();
+      showToast('Coste actualizado');
+    }
+  } else {
+    newVal = prompt(field === 'concepto' ? 'Concepto:' : 'Comentario:', p[field] || '');
+    if (newVal !== null) {
+      p[field] = newVal;
+      saveData(); renderAll();
+      showToast(field.charAt(0).toUpperCase() + field.slice(1) + ' actualizado');
+    }
+  }
+}
+
+function addPresupuesto() {
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <h3>Añadir Nueva Partida</h3>
+    <div class="modal-field"><label>Categoría</label>
+      <select id="pCat">
+        <option>Demolición</option><option>Electricidad</option><option>Fontanería</option><option>Albañilería</option>
+        <option>Ventanas</option><option>Pintura</option><option>Terraza</option>
+        <option>Cocina</option><option>Cocina muebles</option><option>Baños</option>
+        <option>Suelos</option><option>Carpintería</option><option>Calefacción</option>
+        <option>Aire Acondicionado</option><option>Mobiliario</option><option>Electrodomésticos</option>
+        <option>Varios</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Concepto</label><textarea id="pConcepto" placeholder="Descripción del trabajo..."></textarea></div>
+    <div class="modal-field"><label>Coste (EUR)</label><input type="number" id="pCoste" step="0.01" placeholder="0.00"></div>
+    <div class="modal-field"><label>Tipo</label>
+      <select id="pTipo"><option>MO+Mat</option><option>MO</option><option>Mat</option></select>
+    </div>
+    <div class="modal-field"><label>A quién pagar</label>
+      <select id="pQuien"><option>Jose Antonio (cash)</option><option>Comprar y pagar yo</option></select>
+    </div>
+    <div class="modal-field"><label>Comentario (opcional)</label><input type="text" id="pComentario" placeholder="Notas..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePresupuesto()">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function savePresupuesto() {
+  const item = {
+    id: data.nextId++,
+    cat: document.getElementById('pCat').value,
+    concepto: document.getElementById('pConcepto').value,
+    coste: parseFloat(document.getElementById('pCoste').value) || 0,
+    tipo: document.getElementById('pTipo').value,
+    quien: document.getElementById('pQuien').value,
+    estado: 'Sin empezar',
+    pagado: 'Sin pagar',
+    comentario: document.getElementById('pComentario').value
+  };
+  if (!item.concepto) { showToast('Escribe un concepto'); return; }
+  data.presupuesto.push(item);
+  saveData(); closeModal(); renderAll();
+  showToast('Partida añadida');
+}
+
+function deletePresupuesto(idx) {
+  const p = data.presupuesto[idx];
+  if (confirm(`Eliminar "${p.concepto.substring(0,60)}..."?`)) {
+    data.presupuesto.splice(idx, 1);
+    saveData(); renderAll();
+    showToast('Partida eliminada');
+  }
+}
+
+// ============================================================
+// GANTT
+// ============================================================
+function renderGantt() {
+  // Calculate weeks dynamically from first payment date
+  const inicio = getFechaInicio();
+  // Start from the Monday of the week of the first payment
+  const baseDate = new Date(inicio);
+  const dayOfWeek = baseDate.getDay();
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  baseDate.setDate(baseDate.getDate() + diffToMonday);
+
+  // Find min week across all tasks (to support negative weeks like Fase 0)
+  const allWeeks = data.ganttTasks.flatMap(t => Array.isArray(t.weeks) ? t.weeks : []);
+  const minWeek = Math.min(...allWeeks, 1);
+  const preWeeks = minWeek < 1 ? 1 - minWeek : 0;
+
+  // Start earlier to accommodate pre-weeks
+  const startDate = new Date(baseDate);
+  startDate.setDate(startDate.getDate() - preWeeks * 7);
+
+  const numWeeks = getNumSemanas() + preWeeks;
+  const weekDates = [];
+  const weekStarts = [];
+  const weekNumbers = []; // maps index to week number (can be negative)
+  for (let i = 0; i < numWeeks; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i * 7);
+    weekStarts.push(d);
+    weekDates.push(fmtDateShort(d));
+    weekNumbers.push(minWeek + i);
+  }
+
+  const phases = [
+    {name:"FASE 0: ORGANIZACIÓN Y PLANOS", phase:0},
+    {name:"FASE 1: DEMOLICIÓN E INSTALACIÓN ELÉCTRICA", phase:1},
+    {name:"FASE 2: TABIQUERÍA Y BAÑOS", phase:2},
+    {name:"FASE 3: SUELOS, CARPINTERÍA, COCINA Y AIRE", phase:3},
+    {name:"FASE 4: ACABADOS", phase:4},
+    {name:"FASE 5: REMATES Y ENTREGA", phase:5}
+  ];
+
+  const now = new Date();
+  let currentWeek = -1;
+  for (let i = 0; i < weekStarts.length; i++) {
+    const end = new Date(weekStarts[i]); end.setDate(end.getDate() + 6);
+    if (now >= weekStarts[i] && now <= end) { currentWeek = i + 1; break; }
+  }
+
+  let html = '<thead><tr><th style="min-width:30px">#</th><th style="min-width:200px">Tarea</th>';
+  for (let i = 0; i < numWeeks; i++) {
+    const wn = weekNumbers[i];
+    const label = wn <= 0 ? 'P' + (1 - wn) : 'S' + wn;
+    const isCur = (i+1) === currentWeek;
+    html += `<th class="gantt-week-header ${isCur?'gantt-current-week':''}" style="${wn<=0?'background:var(--cream-2)':''}">${label}<br><span class="gantt-date-header">${weekDates[i]}</span></th>`;
+  }
+  html += '<th>Estado</th></tr></thead><tbody>';
+
+  let taskNum = 1;
+  for (const phase of phases) {
+    html += `<tr class="fase-header"><td colspan="${numWeeks+3}">${phase.name}</td></tr>`;
+    const tasks = data.ganttTasks.filter(t => t.phase === phase.phase);
+    for (const task of tasks) {
+      const estado = getTaskEstado(task);
+      html += `<tr><td>${taskNum}</td><td style="font-size:11px">${task.name}</td>`;
+      const taskWeeks = Array.isArray(task.weeks) ? task.weeks : [];
+      for (let i = 0; i < numWeeks; i++) {
+        const wn = weekNumbers[i];
+        const hasBar = taskWeeks.includes(wn);
+        const isCurrent = (i+1) === currentWeek;
+        if (hasBar) {
+          const pattern = estado === 'Terminado' ? 'background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.3) 3px,rgba(255,255,255,0.3) 6px);' : '';
+          const opacity = estado === 'Terminado' ? '0.5' : '1';
+          html += `<td class="gantt-cell ${isCurrent?'gantt-current-week':''}" onclick="toggleGanttWeek(${task.id},${wn})"><div class="gantt-bar ${task.color}" style="opacity:${opacity};${pattern}"></div></td>`;
+        } else {
+          html += `<td class="gantt-cell ${isCurrent?'gantt-current-week':''}" onclick="toggleGanttWeek(${task.id},${wn})"></td>`;
+        }
+      }
+      html += `<td>${estadoBadge(estado)}</td></tr>`;
+      taskNum++;
+    }
+  }
+  html += '</tbody>';
+  document.getElementById('ganttTable').innerHTML = html;
+}
+
+function toggleGanttWeek(taskId, weekNum) {
+  const task = data.ganttTasks.find(t => t.id === taskId);
+  if (!task) return;
+  // Ensure weeks is always an array (Firebase may convert it to object)
+  task.weeks = toArray(task.weeks);
+  const idx = task.weeks.indexOf(weekNum);
+  if (idx >= 0) {
+    task.weeks.splice(idx, 1);
+  } else {
+    task.weeks.push(weekNum);
+    task.weeks.sort((a,b) => a - b);
+  }
+  saveData();
+  renderAll();
+  showToast('Gantt actualizado');
+}
+
+// ============================================================
+// PAGOS
+// ============================================================
+function renderPagos() {
+  updateLastPayment();
+  // Mantener compras de materiales ordenadas cronológicamente (fechas vacías al final).
+  const sortByFecha = (a, b) => (a.fecha || '9999-12-31').localeCompare(b.fecha || '9999-12-31');
+  data.materialesJA.sort(sortByFecha);
+  data.materiales.sort(sortByFecha);
+  const totalReforma = getTotalReforma();
+  const totalPagadoAll = getTotalPagadoAll();
+  const totalPendienteAll = totalReforma - totalPagadoAll;
+  const pctAll = totalReforma > 0 ? Math.round(totalPagadoAll / totalReforma * 100) : 0;
+
+  document.getElementById('pagosStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value" style="color:var(--primary)">${fmt(totalReforma)}</div><div class="stat-label">Total Reforma</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--success)">${fmt(totalPagadoAll)}</div><div class="stat-label">Total Pagado</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--danger)">${fmt(totalPendienteAll)}</div><div class="stat-label">Total Pendiente</div></div>
+    <div class="stat-card"><div class="stat-value">${pctAll}%</div><div class="stat-label">% Pagado</div></div>
+  `;
+
+  // Category 1: Efectivo a Jose Antonio
+  const totalAPagar = getJAPagar();
+  const totalPagado = getTotalPagado();
+  const pctPagado = totalAPagar > 0 ? Math.round(totalPagado / totalAPagar * 100) : 0;
+
+  document.getElementById('pagosList').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>Pagado</span><span><strong>${fmt(totalPagado)}</strong> / ${fmt(totalAPagar)}</span></div>
+      <div class="progress-bar" style="height:14px;border-radius:7px"><div class="progress-fill progress-fill-green" style="width:${pctPagado}%;border-radius:7px"></div></div>
+    </div>
+    ${data.pagos.map(p => `
+      <div class="payment-item ${p.pagado ? 'paid' : ''}" onclick="togglePago(${p.id})">
+        <div class="payment-info">
+          <div class="payment-num">Pago ${p.id} ${p.isLast ? '(último - liquidación pendiente)' : ''}</div>
+          <div class="payment-date">${fmtDate(p.fecha)}</div>
+        </div>
+        <div class="payment-amount" style="color:${p.pagado ? 'var(--success)' : 'var(--text)'}">${p.isLast && !p.pagado ? 'Por determinar' : fmt(p.importe)}</div>
+        <button class="edit-row" onclick="event.stopPropagation(); editPago(${p.id})" title="Editar fecha e importe">Editar</button>
+        <div class="check-circle ${p.pagado ? 'checked' : ''}"></div>
+      </div>
+    `).join('')}
+  `;
+
+  // Category 2: Materiales incluidos presupuesto J.A.
+  const matJATotal = data.jaMaterialesIncluidos;
+  const matJAGastado = getMatJAGastado();
+  const matJARestante = matJATotal - matJAGastado;
+  const matJAPct = matJATotal > 0 ? Math.min(100, Math.round(matJAGastado / matJATotal * 100)) : 0;
+
+  let matJAAcumulado = 0;
+  document.getElementById('matJASection').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>Gastado</span><span><strong>${fmt(matJAGastado)}</strong> / ${fmt(matJATotal)}</span></div>
+      <div class="progress-bar" style="height:14px;border-radius:7px"><div class="progress-fill progress-fill-green" style="width:${matJAPct}%;border-radius:7px"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-top:4px">
+        <span>${fmt(matJAGastado)} gastado</span><span style="color:${matJARestante>=0?'var(--success)':'var(--danger)'}">${fmt(matJARestante)} restante</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="addMaterialJA()">+ Añadir compra</button>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tienda</th><th>Concepto</th><th>Importe</th><th>Acumulado</th><th>Restante</th><th>Método</th><th></th></tr></thead>
+        <tbody>${data.materialesJA.length === 0
+          ? '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:30px">No hay compras registradas.</td></tr>'
+          : data.materialesJA.map((m, i) => {
+            matJAAcumulado += m.importe || 0;
+            const rest = matJATotal - matJAAcumulado;
+            return '<tr><td>'+(i+1)+'</td><td>'+fmtDate(m.fecha)+'</td><td>'+(m.tienda||'-')+'</td><td style="max-width:200px;font-size:12px">'+(m.concepto||'-')+'</td><td><strong>'+(m.importe?fmt(m.importe):'-')+'</strong></td><td>'+fmt(matJAAcumulado)+'</td><td style="color:'+(rest>=0?'var(--success)':'var(--danger)')+'">'+fmt(rest)+'</td><td style="font-size:11px">'+(m.metodo||'-')+'</td><td style="white-space:nowrap"><button class="edit-row" onclick="editMaterialJA('+i+')">Editar</button><button class="delete-row" onclick="deleteMaterialJA('+i+')">&times;</button></td></tr>';
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // Category 3: Mobiliario, Electrodomesticos y Mis Compras
+  const misComprasTotal = getMisCompras();
+  const misComprasGastado = getMisComprasGastado();
+  const misComprasRestante = misComprasTotal - misComprasGastado;
+  const misComprasPct = misComprasTotal > 0 ? Math.min(100, Math.round(misComprasGastado / misComprasTotal * 100)) : 0;
+
+  let misAcumulado = 0;
+  document.getElementById('misComprasSection').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>Gastado</span><span><strong>${fmt(misComprasGastado)}</strong> / ${fmt(misComprasTotal)}</span></div>
+      <div class="progress-bar" style="height:14px;border-radius:7px"><div class="progress-fill progress-fill-green" style="width:${misComprasPct}%;border-radius:7px"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-top:4px">
+        <span>${fmt(misComprasGastado)} gastado</span><span style="color:${misComprasRestante>=0?'var(--success)':'var(--danger)'}">${fmt(misComprasRestante)} restante</span>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tienda</th><th>Concepto</th><th>Importe</th><th>Acumulado</th><th>Restante</th><th>Método</th><th></th></tr></thead>
+        <tbody>${data.materiales.length === 0
+          ? '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:30px">No hay compras registradas.</td></tr>'
+          : data.materiales.map((m, i) => {
+            misAcumulado += m.importe || 0;
+            const rest = misComprasTotal - misAcumulado;
+            return '<tr><td>'+(i+1)+'</td><td>'+fmtDate(m.fecha)+'</td><td>'+(m.tienda||'-')+'</td><td style="max-width:200px;font-size:12px">'+(m.concepto||'-')+'</td><td><strong>'+(m.importe?fmt(m.importe):'-')+'</strong></td><td>'+fmt(misAcumulado)+'</td><td style="color:'+(rest>=0?'var(--success)':'var(--danger)')+'">'+fmt(rest)+'</td><td style="font-size:11px">'+(m.metodo||'-')+'</td><td style="white-space:nowrap"><button class="edit-row" onclick="editMisCompra('+i+')">Editar</button><button class="delete-row" onclick="deleteMaterial('+i+')">&times;</button></td></tr>';
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);">
+      Tiendas habituales: Obramat, Bricodepot, IKEA, Leroy Merlin, Electrodepot
+    </div>
+  `;
+
+  renderCalendar();
+}
+
+function togglePago(id) {
+  const pago = data.pagos.find(p => p.id === id);
+  if (pago) {
+    pago.pagado = !pago.pagado;
+    saveData(); renderAll();
+    showToast(pago.pagado ? 'Pago ' + id + ' marcado como pagado' : 'Pago ' + id + ' desmarcado');
+  }
+}
+
+function editPago(id) {
+  const pago = data.pagos.find(p => p.id === id);
+  if (!pago) return;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Editar Pago ${pago.id}${pago.isLast ? ' (último - ajuste)' : ''}</h3>
+    <div class="modal-field"><label>Fecha</label><input type="date" id="pagoFecha" value="${pago.fecha || ''}"></div>
+    <div class="modal-field"><label>Importe (EUR)</label><input type="number" id="pagoImporte" step="0.01" value="${pago.importe ?? 0}"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditPago(${id})">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveEditPago(id) {
+  const pago = data.pagos.find(p => p.id === id);
+  if (!pago) return;
+  pago.fecha = document.getElementById('pagoFecha').value;
+  pago.importe = parseFloat(document.getElementById('pagoImporte').value) || 0;
+  saveData(); closeModal(); renderAll();
+  showToast('Pago ' + id + ' actualizado');
+}
+
+function renderCalendar() {
+  // Derive months from first and last payment dates
+  const inicio = getFechaInicio();
+  const fin = getFechaFin();
+  const months = [];
+  const monthNames = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  let cur = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
+  const last = new Date(fin.getFullYear(), fin.getMonth(), 1);
+  while (cur <= last) {
+    months.push({name: monthNames[cur.getMonth()] + ' ' + cur.getFullYear(), year: cur.getFullYear(), month: cur.getMonth()});
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  const days = ['L','M','X','J','V','S','D'];
+  const today = new Date();
+  const paymentDates = {};
+  data.pagos.forEach(p => {
+    const d = new Date(p.fecha);
+    paymentDates[`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`] = p;
+  });
+
+  document.getElementById('calendarGrid').innerHTML = months.map(m => {
+    const firstDay = new Date(m.year, m.month, 1);
+    const lastDay = new Date(m.year, m.month + 1, 0).getDate();
+    let startDay = firstDay.getDay() - 1;
+    if (startDay < 0) startDay = 6;
+
+    let cells = days.map(d => `<div class="day-header">${d}</div>`).join('');
+    for (let i = 0; i < startDay; i++) cells += '<div class="day-cell"></div>';
+    for (let d = 1; d <= lastDay; d++) {
+      const key = `${m.year}-${m.month}-${d}`;
+      const payment = paymentDates[key];
+      const isToday = today.getFullYear() === m.year && today.getMonth() === m.month && today.getDate() === d;
+      let cls = 'day-cell';
+      if (payment) cls += payment.pagado ? ' day-payment-done' : (payment.isLast ? ' day-payment-last' : ' day-payment');
+      if (isToday) cls += ' day-today';
+      cells += `<div class="${cls}" ${payment ? `onclick="togglePago(${payment.id})" style="cursor:pointer" title="Pago ${payment.id}: ${payment.importe} EUR"` : ''}>${d}${payment ? '<div style="font-size:7px">P'+payment.id+'</div>' : ''}</div>`;
+    }
+    return `<div class="month-card"><div class="month-title">${m.name}</div><div class="month-grid">${cells}</div></div>`;
+  }).join('');
+}
+
+// ============================================================
+// MATERIALES (now inside Pagos tab)
+// ============================================================
+function addMaterialJA() {
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Añadir Compra Material J.A.</h3>
+    <div class="modal-field"><label>Fecha</label><input type="date" id="matFecha"></div>
+    <div class="modal-field"><label>Tienda</label>
+      <select id="matTienda"><option value="">Seleccionar...</option>
+        <option>Obramat</option><option>Bricodepot</option><option>IKEA</option>
+        <option>Leroy Merlin</option><option>Electrodepot</option><option>Otra</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Concepto</label><input type="text" id="matConcepto" placeholder="Descripción de la compra"></div>
+    <div class="modal-field"><label>Importe (EUR)</label><input type="number" id="matImporte" step="0.01" placeholder="0.00"></div>
+    <div class="modal-field"><label>Método de pago</label>
+      <select id="matMetodo"><option>Transferencia</option><option>Tarjeta</option><option>Bizum</option><option>Efectivo</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMaterialJA()">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveMaterialJA() {
+  data.materialesJA.push({
+    fecha: document.getElementById('matFecha').value,
+    tienda: document.getElementById('matTienda').value,
+    concepto: document.getElementById('matConcepto').value,
+    importe: parseFloat(document.getElementById('matImporte').value) || 0,
+    metodo: document.getElementById('matMetodo').value
+  });
+  saveData(); closeModal(); renderAll();
+  showToast('Compra material J.A. registrada');
+}
+
+function deleteMaterialJA(idx) {
+  if (confirm('Eliminar esta compra?')) {
+    data.materialesJA.splice(idx, 1);
+    saveData(); renderAll();
+    showToast('Compra eliminada');
+  }
+}
+
+function editMaterialJA(idx) {
+  const m = data.materialesJA[idx];
+  if (!m) return;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Editar Compra Material J.A.</h3>
+    <div class="modal-field"><label>Fecha</label><input type="date" id="matFecha" value="${m.fecha || ''}"></div>
+    <div class="modal-field"><label>Tienda</label>
+      <select id="matTienda">
+        ${['Obramat','Bricodepot','IKEA','Leroy Merlin','Electrodepot','Otra'].map(t => `<option ${m.tienda===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-field"><label>Concepto</label><input type="text" id="matConcepto" value="${(m.concepto||'').replace(/"/g,'&quot;')}"></div>
+    <div class="modal-field"><label>Importe (EUR)</label><input type="number" id="matImporte" step="0.01" value="${m.importe ?? 0}"></div>
+    <div class="modal-field"><label>Método de pago</label>
+      <select id="matMetodo">
+        ${['Transferencia','Tarjeta','Bizum','Efectivo'].map(t => `<option ${m.metodo===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditMaterialJA(${idx})">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveEditMaterialJA(idx) {
+  const m = data.materialesJA[idx];
+  if (!m) return;
+  m.fecha = document.getElementById('matFecha').value;
+  m.tienda = document.getElementById('matTienda').value;
+  m.concepto = document.getElementById('matConcepto').value;
+  m.importe = parseFloat(document.getElementById('matImporte').value) || 0;
+  m.metodo = document.getElementById('matMetodo').value;
+  saveData(); closeModal(); renderAll();
+  showToast('Compra material J.A. actualizada');
+}
+
+function addMisCompra() {
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Añadir Compra</h3>
+    <div class="modal-field"><label>Fecha</label><input type="date" id="matFecha"></div>
+    <div class="modal-field"><label>Tienda</label>
+      <select id="matTienda"><option value="">Seleccionar...</option>
+        <option>Obramat</option><option>Bricodepot</option><option>IKEA</option>
+        <option>Leroy Merlin</option><option>Electrodepot</option><option>Otra</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Concepto</label><input type="text" id="matConcepto" placeholder="Descripción de la compra"></div>
+    <div class="modal-field"><label>Importe (EUR)</label><input type="number" id="matImporte" step="0.01" placeholder="0.00"></div>
+    <div class="modal-field"><label>Método de pago</label>
+      <select id="matMetodo"><option>Transferencia</option><option>Tarjeta</option><option>Bizum</option><option>Efectivo</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMisCompra()">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveMisCompra() {
+  data.materiales.push({
+    fecha: document.getElementById('matFecha').value,
+    tienda: document.getElementById('matTienda').value,
+    concepto: document.getElementById('matConcepto').value,
+    importe: parseFloat(document.getElementById('matImporte').value) || 0,
+    metodo: document.getElementById('matMetodo').value
+  });
+  saveData(); closeModal(); renderAll();
+  showToast('Compra registrada');
+}
+
+function deleteMaterial(idx) {
+  if (confirm('Eliminar esta compra?')) {
+    data.materiales.splice(idx, 1);
+    saveData(); renderAll();
+    showToast('Compra eliminada');
+  }
+}
+
+function editMisCompra(idx) {
+  const m = data.materiales[idx];
+  if (!m) return;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Editar Compra</h3>
+    <div class="modal-field"><label>Fecha</label><input type="date" id="matFecha" value="${m.fecha || ''}"></div>
+    <div class="modal-field"><label>Tienda</label>
+      <select id="matTienda">
+        ${['Obramat','Bricodepot','IKEA','Leroy Merlin','Electrodepot','Otra'].map(t => `<option ${m.tienda===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-field"><label>Concepto</label><input type="text" id="matConcepto" value="${(m.concepto||'').replace(/"/g,'&quot;')}"></div>
+    <div class="modal-field"><label>Importe (EUR)</label><input type="number" id="matImporte" step="0.01" value="${m.importe ?? 0}"></div>
+    <div class="modal-field"><label>Método de pago</label>
+      <select id="matMetodo">
+        ${['Transferencia','Tarjeta','Bizum','Efectivo'].map(t => `<option ${m.metodo===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditMisCompra(${idx})">Guardar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveEditMisCompra(idx) {
+  const m = data.materiales[idx];
+  if (!m) return;
+  m.fecha = document.getElementById('matFecha').value;
+  m.tienda = document.getElementById('matTienda').value;
+  m.concepto = document.getElementById('matConcepto').value;
+  m.importe = parseFloat(document.getElementById('matImporte').value) || 0;
+  m.metodo = document.getElementById('matMetodo').value;
+  saveData(); closeModal(); renderAll();
+  showToast('Compra actualizada');
+}
+
+// ============================================================
+// SHARE
+// ============================================================
+function openShareModal() {
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Compartir</h3>
+    <div class="share-options">
+      <div class="share-option" onclick="shareLink()">
+        <div class="share-icon" style="background:#F1DBD2;color:var(--primary-dark)">🔗</div>
+        <div class="share-option-text">
+          <div class="share-option-title">Compartir link</div>
+          <div class="share-option-desc">Copia el enlace para que cualquiera pueda ver y editar la reforma en tiempo real. Los cambios se sincronizan al instante.</div>
+        </div>
+      </div>
+      <div class="share-option" onclick="shareFile()">
+        <div class="share-icon" style="background:#E4E6ED;color:#3D4A6B">📄</div>
+        <div class="share-option-text">
+          <div class="share-option-title">Generar archivo compartible</div>
+          <div class="share-option-desc">Descarga un archivo HTML con todos los datos actuales para enviar por WhatsApp, email, etc.</div>
+        </div>
+      </div>
+      <div class="share-option" onclick="exportJSON()">
+        <div class="share-icon" style="background:#E6EFE0;color:#3F5A34">💾</div>
+        <div class="share-option-text">
+          <div class="share-option-title">Exportar datos (backup)</div>
+          <div class="share-option-desc">Descarga un archivo JSON con todos los datos para backup.</div>
+        </div>
+      </div>
+      <div class="share-option" onclick="importJSON()">
+        <div class="share-icon" style="background:#F4EAD0;color:#7A5A14">📥</div>
+        <div class="share-option-text">
+          <div class="share-option-title">Importar datos</div>
+          <div class="share-option-desc">Carga un archivo JSON exportado previamente.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function shareLink() {
+  const url = 'https://jalcproperties-art.github.io/reforma-borja17/';
+  if (navigator.share) {
+    navigator.share({ title: 'Reforma Borja 17', text: 'Seguimiento de la reforma en tiempo real', url: url }).catch(() => {});
+    closeModal();
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      closeModal();
+      showToast('Link copiado al portapapeles');
+    });
+  } else {
+    prompt('Copia este link:', url);
+  }
+}
+
+function shareFile() {
+  closeModal();
+  showToast('Generando archivo compartible...');
+  // Archivo HTML autocontenido con los datos actuales embebidos
+  const currentData = JSON.stringify(data);
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML
+    .replace(
+      'loadData();\nrenderAll();',
+      `// SHARED VERSION - Data embedded
+try {
+  const shared = ${currentData};
+  if (!localStorage.getItem(STORAGE_KEY)) localStorage.setItem(STORAGE_KEY, JSON.stringify(shared));
+} catch(e) {}
+loadData();
+renderAll();`
+    );
+
+  const blob = new Blob([fullHtml], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Reforma_Borja_17.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  setTimeout(() => showToast('Archivo descargado. Envíale el archivo a tu reformista por WhatsApp o email.'), 500);
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'reforma_borja17_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal();
+  showToast('Backup exportado');
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (imported.presupuesto && imported.pagos) {
+          data = imported;
+          saveData();
+          closeModal();
+          renderAll();
+          showToast('Datos importados correctamente');
+        } else {
+          showToast('Archivo no válido');
+        }
+      } catch(e) {
+        showToast('Error al leer el archivo');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ============================================================
+// NAV + INIT
+// ============================================================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+function updateDynamicDates() {
+  const inicio = getFechaInicio();
+  const fin = getFechaFin();
+  const semanas = getNumSemanas();
+  document.getElementById('navSubtitle').textContent = 'Inicio: ' + fmtDateLong(inicio) + ' | Fin: ' + fmtDateLong(fin) + ' | ' + semanas + ' semanas';
+  document.getElementById('ganttTitle').textContent = 'Diagrama de Gantt - ' + semanas + ' Semanas (' + fmtDateShort(inicio) + ' - ' + fmtDateShort(fin) + ')';
+}
+
+function renderAll() {
+  updateDynamicDates();
+  syncGanttToPresupuesto();
+  renderDashboard();
+  renderPresupuesto();
+  renderGantt();
+  renderPagos();
+}
+
+// INIT
+loadData();
+renderAll();
+initFirebase(); // Connect to Firebase for real-time sync
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { loadData(); renderAll(); }
+});
+</script>
+</body>
+</html>
