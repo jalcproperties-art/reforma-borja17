@@ -928,7 +928,7 @@ select.estado-select:focus, select.pago-select:focus {
 // ============================================================
 // DATA
 // ============================================================
-const STORAGE_KEY = 'reforma_borja17_v3';
+const STORAGE_KEY = 'reforma_borja17_v4';
 
 // Firebase config
 const firebaseConfig = {
@@ -962,12 +962,17 @@ const DEFAULT_DATA = {
     {id:12,cat:"Cocina",concepto:"Montaje de cocina, instalación de desagüe y acometidas de agua. Solo mano de obra",coste:1200,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Muebles y electrodomésticos los compro yo (partidas 17 y 18)"},
     {id:13,cat:"Mobiliario",concepto:"Montaje de muebles según los precios unitarios de las obras anteriores (Borja 9 / PAA)",coste:0,tipo:"MO",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de cuantificar: nº de armarios, camas, lámparas... x precio unitario"},
     {id:14,cat:"Suelos",concepto:"ALTERNATIVA a la partida 9: suelo SPC a 15 €/m², solo la zona del piso excluyendo la terraza",coste:0,tipo:"MO+Mat",quien:"Jose Antonio (cash)",estado:"Sin empezar",pagado:"Sin pagar",comentario:"No activa. Si se elige SPC: 4.000 € aquí y 0 € en la partida 9"},
-    {id:15,cat:"Aire Acondicionado",concepto:"Equipos de aire acondicionado para 8 habitaciones (la partida 11 es solo mano de obra)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
-    {id:16,cat:"Carpintería",concepto:"5 puertas nuevas para la planta superior (la partida 7 es solo mano de obra)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
-    {id:17,cat:"Cocina muebles",concepto:"Mobiliario de cocina y encimera (la partida 12 es solo montaje)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
-    {id:18,cat:"Electrodomésticos",concepto:"Electrodomésticos de la cocina",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
-    {id:19,cat:"Baños",concepto:"Grifería, lavabos, espejos y mamparas de los 3 baños y el aseo (no incluidos en el presupuesto de J.A.)",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"},
-    {id:20,cat:"Mobiliario",concepto:"Mobiliario de las 8 habitaciones",coste:0,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Pendiente de presupuestar"}
+    {id:15,cat:"Aire Acondicionado",concepto:"Equipos de aire acondicionado para las 8 habitaciones, splits o multisplit (la partida 11 es solo la mano de obra)",coste:6400,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: 800 €/ud como en PAA x 8"},
+    {id:16,cat:"Carpintería",concepto:"5 puertas nuevas para la planta superior, con premarcos y manillas (la partida 7 es solo la mano de obra)",coste:900,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA 8 puertas Bricodepot 1.196 € (~150 €/ud) + manillas"},
+    {id:17,cat:"Cocina muebles",concepto:"Mobiliario de la cocina principal y encimeras (la partida 12 es solo el montaje)",coste:4000,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA cocina Bricodepot 2.921 € + armario lavadora y encimeras 584 € para 4 personas; aquí para 8"},
+    {id:18,cat:"Electrodomésticos",concepto:"Electrodomésticos de la cocina principal: 2 frigoríficos, lavadora, secadora, horno, microondas, inducción, campana y lavavajillas",coste:4000,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA 2.180 € (Electrodepot) para 4 habitaciones; aquí el doble de gente"},
+    {id:19,cat:"Baños",concepto:"Grifería, lavabos, muebles de baño, espejos, mamparas y accesorios de los 3 baños y el aseo (no incluidos en el presupuesto de J.A.)",coste:4900,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA ~1.400 €/baño reales (grifos 467, mamparas 610, muebles y mampara 1.402, espejos 413, accesorios 239) x 3 + aseo 700"},
+    {id:20,cat:"Mobiliario",concepto:"Mobiliario de las 8 habitaciones: camas o canapés, colchones, armarios, escritorios, sillas, mesillas, cabeceros y decoración",coste:10000,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA ~4.980 € reales para 4 habitaciones (IKEA 2.651 + canapés 1.360 + cabeceros y mesas 400 + sillas y mesilla 256 + decoración 314) x 2"},
+    {id:21,cat:"Cocina muebles",concepto:"Cocina del apartamento (estudio): muebles, encimera, fregadero, placa de inducción, mini frigorífico y microondas",coste:1800,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA cada minicocina costó ~600 €; aquí es una cocina pequeña completa"},
+    {id:22,cat:"Varios",concepto:"Agua caliente: termos o calentadores para 8 habitaciones y 4 baños",coste:800,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA 1 calentador 402 €; aquí 2 unidades mayores"},
+    {id:23,cat:"Varios",concepto:"Iluminación: focos, lámparas y bombillas de habitaciones y zonas comunes",coste:800,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación: en PAA ~900 € repartidos en varias compras de Obramat"},
+    {id:24,cat:"Carpintería",concepto:"Cerraduras con llave y manillas para las 8 habitaciones (la colocación no está en el presupuesto de J.A.)",coste:400,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"Estimación 50 €/ud; en PAA J.A. cobró 320 € por 4 habitaciones (MO+Mat)"},
+    {id:25,cat:"Varios",concepto:"Poyaques, pequeño material, limpieza final e imprevistos",coste:2000,tipo:"Mat",quien:"Comprar y pagar yo",estado:"Sin empezar",pagado:"Sin pagar",comentario:"En PAA se provisionaron 1.500 € para 4 habitaciones"}
   ],
   materialesPresupuesto: 10500,
   jaMaterialesIncluidos: 10500,
@@ -999,7 +1004,7 @@ const DEFAULT_DATA = {
     {id:15,name:"Remates y limpieza final",presupId:null,weeks:[14],color:"color-remate",phase:5},
     {id:16,name:"Entrega final + último pago",presupId:null,weeks:[14],color:"color-remate",phase:5}
   ],
-  nextId: 21
+  nextId: 26
 };
 
 let data;
