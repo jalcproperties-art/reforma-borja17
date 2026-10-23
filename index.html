@@ -928,7 +928,7 @@ select.estado-select:focus, select.pago-select:focus {
 // ============================================================
 // DATA
 // ============================================================
-const STORAGE_KEY = 'reforma_borja17_v4';
+const STORAGE_KEY = 'reforma_borja17_v5';
 
 // Firebase config
 const firebaseConfig = {
@@ -977,32 +977,32 @@ const DEFAULT_DATA = {
   materialesPresupuesto: 10500,
   jaMaterialesIncluidos: 10500,
   pagos: [
-    {id:1,fecha:"2026-10-26",importe:4000,pagado:false},
+    {id:1,fecha:"2026-10-23",importe:4000,pagado:false},
     {id:2,fecha:"2026-11-16",importe:4000,pagado:false},
     {id:3,fecha:"2026-12-07",importe:4000,pagado:false},
     {id:4,fecha:"2026-12-28",importe:4000,pagado:false},
     {id:5,fecha:"2027-01-18",importe:4000,pagado:false},
-    {id:6,fecha:"2027-01-29",importe:0,pagado:false,isLast:true}
+    {id:6,fecha:"2027-02-12",importe:0,pagado:false,isLast:true}
   ],
   materiales: [],
   materialesJA: [],
   ganttTasks: [
     {id:1,name:"Organización de la reforma y planos",presupId:null,weeks:[-1,0,1],color:"color-org",phase:0},
     {id:2,name:"1-Descombro y limpieza (chimenea, puertas, muros, suelo, terraza)",presupId:1,weeks:[1,2,3],color:"color-demo",phase:1},
-    {id:3,name:"8-Electricidad (8 habitaciones + cocina)",presupId:8,weeks:[3,4,5],color:"color-elec",phase:1},
-    {id:4,name:"2-Tabiquería planta inferior y superior",presupId:2,weeks:[3,4,5],color:"color-alb",phase:2},
-    {id:5,name:"3-Baño apartamento (plato, taza, casetón, alicatado)",presupId:3,weeks:[5,6,7,8],color:"color-bano",phase:2},
-    {id:6,name:"4-Baño planta arriba (plato, taza, alicatado)",presupId:4,weeks:[6,7,8],color:"color-bano",phase:2},
-    {id:7,name:"6-Aseo planta arriba (taza, plato, alicatado)",presupId:6,weeks:[7,8,9],color:"color-bano",phase:2},
-    {id:8,name:"5-Arreglo baño planta abajo",presupId:5,weeks:[8,9],color:"color-bano",phase:2},
-    {id:9,name:"9-Suelo cerámico en todo el piso",presupId:9,weeks:[8,9,10],color:"color-suelo",phase:3},
-    {id:10,name:"7-Puertas (2 reubicadas abajo + 5 nuevas arriba)",presupId:7,weeks:[10,11],color:"color-carp",phase:3},
-    {id:11,name:"12-Montaje cocina + desagüe + acometidas",presupId:12,weeks:[12,13],color:"color-pint",phase:3},
-    {id:12,name:"11-Aire acondicionado 8 habitaciones",presupId:11,weeks:[12,13],color:"color-aire",phase:3},
-    {id:13,name:"10-Alisado y pintado",presupId:10,weeks:[11,12,13],color:"color-pint",phase:4},
-    {id:14,name:"13-Montaje de muebles",presupId:13,weeks:[13,14],color:"color-carp",phase:5},
-    {id:15,name:"Remates y limpieza final",presupId:null,weeks:[14],color:"color-remate",phase:5},
-    {id:16,name:"Entrega final + último pago",presupId:null,weeks:[14],color:"color-remate",phase:5}
+    {id:3,name:"8-Electricidad (8 habitaciones + cocina)",presupId:8,weeks:[5,6,7],color:"color-elec",phase:1},
+    {id:4,name:"2-Tabiquería planta inferior y superior",presupId:2,weeks:[4,5,6],color:"color-alb",phase:2},
+    {id:5,name:"3-Baño apartamento (plato, taza, casetón, alicatado)",presupId:3,weeks:[7,8,9,10],color:"color-bano",phase:2},
+    {id:6,name:"4-Baño planta arriba (plato, taza, alicatado)",presupId:4,weeks:[8,9,10],color:"color-bano",phase:2},
+    {id:7,name:"6-Aseo planta arriba (taza, plato, alicatado)",presupId:6,weeks:[9,10,11],color:"color-bano",phase:2},
+    {id:8,name:"5-Arreglo baño planta abajo",presupId:5,weeks:[10,11],color:"color-bano",phase:2},
+    {id:9,name:"9-Suelo cerámico en todo el piso",presupId:9,weeks:[10,11,12],color:"color-suelo",phase:3},
+    {id:10,name:"7-Puertas (2 reubicadas abajo + 5 nuevas arriba)",presupId:7,weeks:[12,13],color:"color-carp",phase:3},
+    {id:11,name:"12-Montaje cocina + desagüe + acometidas",presupId:12,weeks:[14,15],color:"color-pint",phase:3},
+    {id:12,name:"11-Aire acondicionado 8 habitaciones",presupId:11,weeks:[14,15],color:"color-aire",phase:3},
+    {id:13,name:"10-Alisado y pintado",presupId:10,weeks:[13,14,15],color:"color-pint",phase:4},
+    {id:14,name:"13-Montaje de muebles",presupId:13,weeks:[15,16],color:"color-carp",phase:5},
+    {id:15,name:"Remates y limpieza final",presupId:null,weeks:[16,17],color:"color-remate",phase:5},
+    {id:16,name:"Entrega final + último pago",presupId:null,weeks:[17],color:"color-remate",phase:5}
   ],
   nextId: 26
 };
@@ -1183,7 +1183,11 @@ function mondayOf(d) {
   return m;
 }
 function getNumSemanas() {
-  // Semanas naturales (lunes a domingo) entre el primer y el último pago
+  // Duración de la obra en semanas (del primer al último pago), como en el contrato
+  return Math.max(1, Math.ceil((getFechaFin() - getFechaInicio()) / (7 * 24 * 60 * 60 * 1000)));
+}
+function getNumColumnasGantt() {
+  // Semanas naturales (lunes a domingo) que toca la obra: columnas S1..Sn del Gantt
   return Math.round((mondayOf(getFechaFin()) - mondayOf(getFechaInicio())) / (7 * 24 * 60 * 60 * 1000)) + 1;
 }
 function fmtDateLong(d) {
@@ -1607,7 +1611,7 @@ function renderGantt() {
   const startDate = new Date(baseDate);
   startDate.setDate(startDate.getDate() - preWeeks * 7);
 
-  const numWeeks = getNumSemanas() + preWeeks;
+  const numWeeks = getNumColumnasGantt() + preWeeks;
   const weekDates = [];
   const weekStarts = [];
   const weekNumbers = []; // maps index to week number (can be negative)
@@ -2191,7 +2195,7 @@ function updateDynamicDates() {
   const fin = getFechaFin();
   const semanas = getNumSemanas();
   document.getElementById('navSubtitle').textContent = 'Inicio: ' + fmtDateLong(inicio) + ' | Fin: ' + fmtDateLong(fin) + ' | ' + semanas + ' semanas';
-  document.getElementById('ganttTitle').textContent = 'Diagrama de Gantt - ' + semanas + ' Semanas (' + fmtDateShort(inicio) + ' - ' + fmtDateShort(fin) + ')';
+  document.getElementById('ganttTitle').textContent = 'Diagrama de Gantt - ' + semanas + ' semanas de obra (' + fmtDateShort(inicio) + ' - ' + fmtDateShort(fin) + ')';
 }
 
 function renderAll() {
